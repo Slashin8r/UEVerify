@@ -5,10 +5,24 @@
   </head>
 <body>
   <form id="control-row" style="text-align: center;">
-    <label for="input">Discord Name: (Example#1234)</label>
+    <label for="rating">Rating:</label>
     <br>
-    <input type="text" id="input">
-    <b><span id="message" style="color:red;" hidden></span></b>
+    <select name="rating" id="rating">
+      <option value="5">5</option>
+      <option value="4">4</option>
+      <option value="3">3</option>
+      <option value="2">2</option>
+      <option value="1">1</option>
+    </select>
+    <br>
+    <label for="title">Title:</label>
+    <br>
+    <input type="text" id="title">
+    <br>
+    <label for="content">Content:</label>
+    <br>
+    <input type="text" id="content">
+    <b><span id="error" style="color:red;" hidden></span></b>
     <br><br>
     <button id="go">Verify Purchase</button>
   </form>

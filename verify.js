@@ -1,42 +1,48 @@
 const form = document.getElementById("control-row");
-const input = document.getElementById("input");
-const message = document.getElementById("message");
+const rating = document.getElementById("rating");
+const title = document.getElementById("title");
+const content = document.getElementById("content");
+const error = document.getElementById("error");
 
 (async function initPopupWindow() {
-  input.focus();
+  title.focus();
 })();
 
 form.addEventListener("submit", handleFormSubmit);
 
 async function handleFormSubmit(event) {
   event.preventDefault();
-  clearMessage();
-  if (input.value.length < 5) {
-    setMessage("Must Have 5+ Characters!");
+  clearError();
+  if (title.value.length < 5) {
+    setError("Title < 5 Characters!");
+	return;
+  }
+  if (content.value.length < 5) {
+    setError("Content < 5 Characters!");
 	return;
   }
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab.url.search("unrealengine.com/marketplace") < 0) {
-    setMessage("Tab Not UE Marketplace!");
+    setError("Tab Not UE Marketplace!");
 	return;
   }
   const bearer = await chrome.cookies.get({url:"https://www.unrealengine.com", name:"EPIC_BEARER_TOKEN"});
   if (!bearer) {
-    setMessage("Not Logged In!");
+    setError("Not Logged In!");
 	return;
   }
   const cookie = await chrome.cookies.get({url:"https://www.unrealengine.com/marketplace", name:"XSRF-TOKEN"});
   if (!cookie) {
-    setMessage("Not Authorized!");
+    setError("Not Authorized!");
 	return;
   }
   await chrome.scripting.executeScript({
-    args: [cookie.value, input.value],
+    args: [cookie.value, rating.value, title.value, content.value],
     target: {
       tabId: tab.id,
     },
-    func: (arg1, arg2) => {
-      var addReview = function(product, owner, token, content) {
+    func: (arg1, arg2, arg3, arg4) => {
+      var addReview = function(product, owner, token, stars, subject, message) {
         fetch("https://www.unrealengine.com/marketplace/api/review/" + product + "/reviews/add", {
           method: "POST",
           headers: {
@@ -44,7 +50,7 @@ async function handleFormSubmit(event) {
             "x-requested-with": "XMLHttpRequest",
             "x-xsrf-token": token
           },
-          body: JSON.stringify({ "rating": 5, "title": "Verification", "content": content, "targetOwner": owner })
+          body: JSON.stringify({ "rating": stars, "title": subject, "content": message, "targetOwner": owner })
         });
         /*fetch("https://www.unrealengine.com/marketplace/api/review/" + product + "/questions/add", {
           method: "POST",
@@ -53,7 +59,7 @@ async function handleFormSubmit(event) {
             "x-requested-with": "XMLHttpRequest",
             "x-xsrf-token": token
           },
-          body: JSON.stringify({ "title": "Verification", "content": content, "targetOwner": owner })
+          body: JSON.stringify({ "title": subject, "content": message, "targetOwner": owner })
         });*/
       }
       const html = document.documentElement.outerHTML;
@@ -64,19 +70,19 @@ async function handleFormSubmit(event) {
       request.send(null);
       request.onreadystatechange = function() {
         if (request.readyState == 4)
-          addReview(product, (request.responseText.split("\"owner\":\"")[1]).split("\"").shift(), arg1, arg2);
+          addReview(product, (request.responseText.split("\"owner\":\"")[1]).split("\"").shift(), arg1, arg2, arg3, arg4);
       };
     }
   });
-  setMessage("Verified!");
+  setError("Verified!");
 }
 
-function setMessage(str) {
-  message.textContent = str;
-  message.hidden = false;
+function setError(str) {
+  error.textContent = str;
+  error.hidden = false;
 }
 
-function clearMessage() {
-  message.textContent = "";
-  message.hidden = true;
+function clearError() {
+  error.textContent = "";
+  error.hidden = true;
 }
