@@ -52,6 +52,15 @@ async function handleFormSubmit(event) {
           },
           body: JSON.stringify({ "rating": stars, "title": subject, "content": message, "targetOwner": owner })
         });
+		fetch("https://www.unrealengine.com/marketplace/api/review/" + product + "/reviews/add", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json;charset=UTF-8",
+            "x-requested-with": "XMLHttpRequest",
+            "x-xsrf-token": token
+          },
+          body: JSON.stringify({ "rating": stars, "title": "-----", "content": "-----", "targetOwner": owner })
+        });
         /*fetch("https://www.unrealengine.com/marketplace/api/review/" + product + "/questions/add", {
           method: "POST",
           headers: {
