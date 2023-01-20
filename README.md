@@ -1,5 +1,6 @@
 # UEVerify
 Unreal Engine Marketplace Discord Verification
+This extension brings back the title and message for reviews. Since we are no longer able to post new questions, we will have to use the reviews to verify all purchases.
 
 # How to Install
 1. Clone the repository or download and unzip
